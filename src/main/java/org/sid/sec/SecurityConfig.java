@@ -19,28 +19,43 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	private javax.sql.DataSource dataSource;
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-//		BCryptPasswordEncoder bcpe = getBCPE();
-//		System.out.println(bcpe.encode("1234"));
+		
 		/*
-	    auth.inMemoryAuthentication().withUser("admin").password(bcpe.encode("1234")).roles("ADMIN", "USER");
+ 		auth.inMemoryAuthentication().withUser("admin").password("{noop}1234").roles("ADMIN", "USER");
+ 		auth.inMemoryAuthentication().withUser("user").password("{noop}1234").roles("USER");
+ 		 
+ 		BCryptPasswordEncoder bcpe = getBCPE();
+		System.out.println(bcpe.encode("1234"));
+	    auth.inMemoryAuthentication().withUser("admin").password(bcpe.encode("1234")).roles("ADMIN", "USER");	   
 		auth.inMemoryAuthentication().withUser("user").password(bcpe.encode("1234")).roles("USER");
 		auth.inMemoryAuthentication().passwordEncoder(new BCryptPasswordEncoder());
 		*/
-		
 		auth.jdbcAuthentication()
 		.dataSource(dataSource)	
 		.usersByUsernameQuery("select username as principal, password as credentiels, active from users where username=?")
 		.authoritiesByUsernameQuery("select username as principal,roles as role from users_roles where username=?")
 		.rolePrefix("ROLE_")
-		.passwordEncoder(getBCPE() /*new BCryptPasswordEncoder()*/);
+		.passwordEncoder(getBCPE() 
+	/*new BCryptPasswordEncoder()*/);
 	
 	}
+	
 
+	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
+		
+		/*
+	     super.configure(http);
+		 */
+		
 		http.formLogin().loginPage("/login");
-//		http.authorizeRequests().anyRequest().authenticated();
-//		http.authorizeRequests().antMatchers("/save", "/delete","/edit").hasRole("ADMIN");
+		
+	/*	
+		http.authorizeRequests().anyRequest().authenticated();
+		http.authorizeRequests().antMatchers("/save", "/delete","/edit").hasRole("ADMIN");
+	*/
+		
 		http.authorizeRequests().antMatchers("/admin/*").hasRole("ADMIN");
 		http.authorizeRequests().antMatchers("/user/*").hasRole("USER");
 		http.exceptionHandling().accessDeniedPage("/403");
